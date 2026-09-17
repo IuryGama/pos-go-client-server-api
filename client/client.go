@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -34,6 +35,14 @@ func main() {
 		panic(err)
 	}
 	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusOK {
+		body, readErr := io.ReadAll(res.Body)
+		if readErr != nil {
+			log.Fatalf("Servidor respondeu %d (corpo ilegível: %v)", res.StatusCode, readErr)
+		}
+		log.Fatalf("Servidor respondeu %d: %s", res.StatusCode, body)
+	}
 
 	var b Bid
 	err = json.NewDecoder(res.Body).Decode(&b)

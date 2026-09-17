@@ -67,14 +67,11 @@ func CotacaoHandler(db *sql.DB) http.HandlerFunc {
 
 		err = InserDatabase(ctxInsert, db, cambio)
 		if err != nil {
-			if ctx.Err() == context.DeadlineExceeded {
+			if ctxInsert.Err() == context.DeadlineExceeded {
 				log.Println("Timeout ao inserir dado no banco de dados: ", err)
-				http.Error(w, "Timeout ao inserir dado no banco de dados: "+err.Error(), http.StatusInternalServerError)
-				return
+			} else {
+				log.Println("Erro ao inserir dado no banco de dados: ", err)
 			}
-			log.Println("Erro ao inserir dado no banco de dados: ", err)
-			http.Error(w, "Erro ao inserir dado no banco de dados: "+err.Error(), http.StatusInternalServerError)
-			return
 		}
 
 		w.Header().Set("Content-Type", "application/json")
